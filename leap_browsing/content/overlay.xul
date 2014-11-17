@@ -10,19 +10,19 @@
 	
     <menupopup id="menu_ToolsPopup">
     	<menuitem
-        	label="サイト1"
+        	label="site1"
         	insertbefore="sanitizeSeparator"
         	onmousedown='Block.startBlock("http://www.tohoho-web.com/html5/html5.html")'
         />
         
         <menuitem
-        	label="サイト2"
+        	label="site2"
         	insertbefore="sanitizeSeparator"
         	onmousedown='Block.startBlock("http://mainichi.jp/")'
         />
         
         <menuitem
-        	label="サイト3"
+        	label="site3"
         	insertbefore="sanitizeSeparator"
         	onmousedown='Block.startBlock("http://mtg-jp.com/")'
         />

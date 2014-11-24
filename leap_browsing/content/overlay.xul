@@ -3,10 +3,12 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script type="text/javascript" src="chrome://leap_browsing/content/block/jquery-1.11.1.min.js" />
 	<script type="text/javascript" src="chrome://leap_browsing/content/block/jquery.xdomainajax.js" />
-	<script type="text/javascript" src="chrome://leap_browsing/content/view/leap-0.6.3.js" />
 	 
     <script type="text/javascript" src="chrome://leap_browsing/content/block/block.js" />
-    <script type="text/javascript" src="chrome://leap_browsing/content/view/tab.js" />
+    <script type="text/javascript" src="chrome://leap_browsing/content/view/view.js" />
+	
+	<!--- ビュー処理監視用ループ関数 -->
+	<script>viewLoop();</script>
 	
     <menupopup id="menu_ToolsPopup">
     	<menuitem

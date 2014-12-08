@@ -45,24 +45,24 @@ function viewLoop() {
     var obj = JSON.parse(event.data);
 
     // 描いた円の処理
-    getCircleGesture(obj);
+    getCirclegesture(obj);
 
     // タブビューを開く処理
-    if (right_cir_cnt == 1 && sw_1 == 0 && sw_3 == 0) { tabviewOpen(); }
-    if (sw_1 == 1) { tabviewSelect(); }
-    if (sw_2 == 1) { tabviewInit(); }
+    if (right_cir_cnt == 1 && sw_1 == 0 && sw_3 == 0) { openTabview(); }
+    if (sw_1 == 1) { selectTabview(); }
+    if (sw_2 == 1) { initTabview(); }
 
     // ブックマークビューを開く処理
-    if (left_cir_cnt == 1 && sw_3 == 0 && sw_1 == 0) { bkviewOpen(); }
-    if (sw_3 == 1 && sw_4 == 0) { bkviewSelect(); }
-    if (sw_4 == 1) { bkviewInit(); }
+    if (left_cir_cnt == 1 && sw_3 == 0 && sw_1 == 0) { openBkview(); }
+    if (sw_3 == 1 && sw_4 == 0) { selectBkview(); }
+    if (sw_4 == 1) { initBkview(); }
 
     gesture_type = 0;
   };  
 }
 
 // 円の情報処理用関数
-function getCircleGesture(opt_obj) {
+function getCirclegesture(opt_obj) {
     // 円を描くジェスチャー取得
     if (typeof(opt_obj.gestures) != 'undefined' ) {
       for (var i=0; i < opt_obj.gestures.length; i++) {
@@ -91,7 +91,7 @@ function getCircleGesture(opt_obj) {
 }
 
 // タブビュー表示用関数
-function tabviewOpen() {
+function openTabview() {
   // 現在開かれているタブの数を取得
   var num = gBrowser.tabContainer.childNodes.length;
   // タブ情報を格納する配列
@@ -134,7 +134,7 @@ function tabviewOpen() {
 }
 
 // タブ選択用関数
-function tabviewSelect() {
+function selectTabview() {
   $tabview_dom = $(tabview.contentDocument);
   // タブブロックが押されたか
   $tabview_dom.find("#tab_block_pos #tab_block").click(function () {
@@ -153,14 +153,14 @@ function tabviewSelect() {
 }
 
 // タブビュー変数初期化用関数
-function tabviewInit() {
+function initTabview() {
   sw_1 = 0;
   sw_2 = 0;
   right_cir_cnt = 0;
 }
 
 // ブックマークビュー表示用関数
-function bkviewOpen() {
+function openBkview() {
   // ブックマークビュー用の新規タブを開く
   bkview = gBrowser.getBrowserForTab(gBrowser.addTab());
 
@@ -228,7 +228,7 @@ function bkviewOpen() {
 }
 
 // ブックマーク選択用関数
-function bkviewSelect() {
+function selectBkview() {
   $bkview_dom = $(bkview.contentDocument);
   // ブックマークブロックが押されたか
   $bkview_dom.find("#bk_block_pos #bk_block").one('click', function () {
@@ -248,7 +248,7 @@ function bkviewSelect() {
 }
 
 // ブックマークビュー変数初期化用関数
-function bkviewInit() {
+function initBkview() {
   sw_3 = 0;
   sw_4 = 0;
   left_cir_cnt = 0;

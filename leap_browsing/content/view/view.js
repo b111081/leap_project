@@ -38,25 +38,25 @@ function viewLoop() {
     leap_soket = null;
     console.log(event + "WebSocket connection closed");
   };
-  
+
   // データが送られてくる度処理を行う
   leap_soket.onmessage = function(event) {
     // JSON解析
     var obj = JSON.parse(event.data);
-    
+
     // 描いた円の処理
     getCircleGesture(obj);
-    
+
     // タブビューを開く処理
     if (right_cir_cnt == 1 && sw_1 == 0 && sw_3 == 0) { tabviewOpen(); }
     if (sw_1 == 1) { tabviewSelect(); }
     if (sw_2 == 1) { tabviewInit(); }
-    
+
     // ブックマークビューを開く処理
     if (left_cir_cnt == 1 && sw_3 == 0 && sw_1 == 0) { bkviewOpen(); }
     if (sw_3 == 1 && sw_4 == 0) { bkviewSelect(); }
     if (sw_4 == 1) { bkviewInit(); }
-    
+
     gesture_type = 0;
   };  
 }
@@ -68,7 +68,7 @@ function getCircleGesture(opt_obj) {
       for (var i=0; i < opt_obj.gestures.length; i++) {
       	gesture_type = opt_obj.gestures[i].type;
       	gesture_state = opt_obj.gestures[i].state;
-      	
+
       	// 時計回りか反時計回りか
       	if (gesture_type =='circle') {
       	  if (opt_obj.gestures[i].normal[2] <= 0) {
@@ -79,15 +79,13 @@ function getCircleGesture(opt_obj) {
         }
       }
     }
-    
+
     // 円の向きに応じてカウントアップ
     if (gesture_type == 'circle' && gesture_state == 'stop') {
       if (clockwiseness == true) {
         right_cir_cnt++;
-        console.log(right_cir_cnt);
       } else if (clockwiseness == false) {
       	left_cir_cnt++;
-      	console.log(left_cir_cnt);
       }
     }
 }
@@ -100,38 +98,38 @@ function tabviewOpen() {
   var Tab = [];
   // ブロック配置用配列
   var Tab_block = [];
-  
+
   // タブビュー用の新規タブを開く
   tabview = gBrowser.getBrowserForTab(gBrowser.addTab());
-  
+
   // タブビューにフォーカスを移す
   gBrowser.selectedTab = gBrowser.tabContainer.childNodes[gBrowser.tabContainer.childNodes.length-1];
-  
+
   // ページを読み込み終わると次の処理に移る
   tabview.addEventListener("load", function() {
     // ブロック配置用のdiv要素でタブビューを上書き
     tabview.contentDocument.body.innerHTML = "<div id='tab_block_pos'> </div>";
-    
+
     // タブビューをJqueryのDOM要素に変換し変数に格納
     $tabview_dom = $(tabview.contentDocument);
-    
+
     // タブ情報を配列に格納し、ブロック用配列に格納
     for (var i = 0; i < num; ++i) {
       var r = [];
       r[i] = i+1;
       Tab[i] = gBrowser.tabContainer.childNodes[i];
-      Tab_block[i] =  
+      Tab_block[i] =
          '<div id="block" style="float:left;"><button id="tab_block" aria-label="タブ' + r[i] + '" value="' + r[i] +'" style="width : 200px;height : 400px; word-break:keep-all;">' + r[i] + '</button></div>'; 
       //console.log(Tab_block[i]);
       $tabview_dom.find("#tab_block_pos").append(Tab_block[i]);
     }
 
-    // 音声再生用処理
-   	//$tabview_dom.find("body").append('<audio src="http://localhost/audio/tab_open.mp3" autoplay></audio>');
-    //$tabview_dom.find("audio").get(0).play();
+    // 音声を再生する
+   	$tabview_dom.find("body").append('<audio src="http://localhost/audio/tab_open.wav" autoplay></audio>');
+    $tabview_dom.find("audio").get(0).play();
   }, true);
-  
-  //ループ制御
+
+  // ループ制御
   sw_1 = 1;
 }
 
@@ -141,13 +139,17 @@ function tabviewSelect() {
   // タブブロックが押されたか
   $tabview_dom.find("#tab_block_pos #tab_block").click(function () {
   	if (sw_2 == 0) {
-      // 押されたタブブロックの番号のタブを開く
-      gBrowser.selectedTab = gBrowser.tabContainer.childNodes[$(this).val() - 1];
-      // タブビュー消去
-      gBrowser.removeTab(gBrowser.tabContainer.childNodes[gBrowser.tabContainer.childNodes.length-1]);
+  	  // 音声を再生する
+      $tabview_dom.find("audio").remove();
+   	  $tabview_dom.find("body").append('<audio src="http://localhost/audio/tab_close.wav" autoplay></audio>');
+      $tabview_dom.find("audio").get(0).play();
+      // 音声が再生終了したら閉じる処理をする
+      var promise = closeView($(this).val() - 1);
+      promise.done(function() {
+      });
    }
     sw_2 = 1;
-  });
+   });
 }
 
 // タブビュー変数初期化用関数
@@ -161,10 +163,10 @@ function tabviewInit() {
 function bkviewOpen() {
   // ブックマークビュー用の新規タブを開く
   bkview = gBrowser.getBrowserForTab(gBrowser.addTab());
-  
+
   // ブックマークビューにフォーカスを移す
   gBrowser.selectedTab = gBrowser.tabContainer.childNodes[gBrowser.tabContainer.childNodes.length-1];
-  
+
   // ページを読み込み終わると次の処理に移る
   bkview.addEventListener("load", function() {
     // ブックマークの情報を得るための準備
@@ -178,7 +180,7 @@ function bkviewOpen() {
     var toolbarFolder = bookmarksService.toolbarFolder;
 
     query.setFolders([toolbarFolder], 1);
-    
+
     // ブックマークツールバーのルート取得
     var result = historyService.executeQuery(query, options);
     var rootNode = result.root;
@@ -191,7 +193,7 @@ function bkviewOpen() {
     var bk_uri = [];
     // ブックマークの総数取得用変数
     var bk_num = rootNode.childCount;
-    
+
     // 使用するブックマークフォルダにあるブックマーク取得
     for (var i = 1; i < rootNode.childCount; i++) {
         var node = rootNode.getChild(i);
@@ -201,16 +203,13 @@ function bkviewOpen() {
 
     // 開けたフォルダを閉じる
     rootNode.containerOpen = false;
-                      
     // ブロック配置用のdiv要素でタブビューを上書き
     bkview.contentDocument.body.innerHTML = "<div id='bk_block_pos'> </div>";
-      
     // ブックマークビューをJqueryのDOM要素に変換し変数に格納
     $bkview_dom = $(bkview.contentDocument);
-    
     // ブックマークブロックを格納する配列
     var bk_block = [];
-    
+
     // ブックマーク情報を配列に格納し、ブロック用配列に格納
     for (var i = 1; i < bk_num; ++i) {
         bk_block[i] =  
@@ -218,15 +217,13 @@ function bkviewOpen() {
       //console.log(Tab_block[i]);
       $bkview_dom.find("#bk_block_pos").append(bk_block[i]);
     }
-    
-    // 音声再生用処理
-   	//$tabview_dom.find("body").append('<audio src="http://localhost/audio/bk_open.mp3" autoplay></audio>');
-    //$tabview_dom.find("audio").get(0).play();
 
-    
+    // 音声を再生する
+   	$bkview_dom.find("body").append('<audio src="http://localhost/audio/bk_open.wav" autoplay></audio>');
+    $bkview_dom.find("audio").get(0).play();
   }, true);
-  
-  //ループ制御
+
+  // ループ制御
   sw_3 = 1;
 }
 
@@ -236,10 +233,15 @@ function bkviewSelect() {
   // ブックマークブロックが押されたか
   $bkview_dom.find("#bk_block_pos #bk_block").one('click', function () {
     if (sw_4 == 0) {
-      // 押されたブックマークブロックのブックマークを開く
-      Block.startBlock($(this).val());
-      // ブックマークビュー消去
-      gBrowser.removeTab(gBrowser.tabContainer.childNodes[gBrowser.tabContainer.childNodes.length-2]);
+      // 音声を再生する
+      $bkview_dom.find("audio").remove();
+   	  $bkview_dom.find("body").append('<audio src="http://localhost/audio/bk_close.wav" autoplay></audio>');
+   	  // 音声再生終了後処理開始
+      $bkview_dom.find("audio").get(0).play();
+      // 音声が再生終了したら閉じる処理をする
+      var promise = closeView($(this).val());
+      promise.done(function() {
+      });
     }
     sw_4 = 1;
   });
@@ -250,4 +252,29 @@ function bkviewInit() {
   sw_3 = 0;
   sw_4 = 0;
   left_cir_cnt = 0;
+}
+
+// ビュー消去用関数
+function closeView(opt) {
+  // 同期処理用変数
+  var defer = $.Deferred();
+  if (sw_1 == 1) {
+    setTimeout(function() {
+      // 押されたタブブロックの番号のタブを開く
+      gBrowser.selectedTab = gBrowser.tabContainer.childNodes[opt];
+      // タブビュー消去
+      gBrowser.removeTab(gBrowser.tabContainer.childNodes[gBrowser.tabContainer.childNodes.length-1]);
+      defer.resolve();
+    }, 1000);
+  } else if (sw_3 == 1) {
+    setTimeout(function() {
+      console.log(opt);
+      // ブックマークビュー消去
+      gBrowser.removeTab(gBrowser.tabContainer.childNodes[gBrowser.tabContainer.childNodes.length-1]);
+      // 押されたブックマークブロックのブックマークを開く
+      Block.startBlock(opt);
+    defer.resolve();
+    }, 1000);
+  }
+  return defer.promise();
 }

@@ -1,32 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<!--- 各種ライブラリ読み込み -->
 	<script type="text/javascript" src="chrome://leap_browsing/content/block/jquery-1.11.1.min.js" />
 	<script type="text/javascript" src="chrome://leap_browsing/content/block/jquery.xdomainajax.js" />
-	 
+    
+    <!--- アドオンのメインプログラム --> 
     <script type="text/javascript" src="chrome://leap_browsing/content/block/block.js" />
     <script type="text/javascript" src="chrome://leap_browsing/content/view/view.js" />
-	
+
 	<!--- ビュー処理監視用ループ関数 -->
 	<script>viewLoop();</script>
-	
+
     <menupopup id="menu_ToolsPopup">
-    	<menuitem
-        	label="site1"
-        	insertbefore="sanitizeSeparator"
-        	onmousedown='Block.startBlock("http://www.tohoho-web.com/html5/html5.html")'
-        />
+    <menuitem
+        label="site1"
+        insertbefore="sanitizeSeparator"
+        onmousedown='Block.startBlock("http://www.tohoho-web.com/html5/html5.html")'
+	/>
         
-        <menuitem
-        	label="site2"
-        	insertbefore="sanitizeSeparator"
-        	onmousedown='Block.startBlock("http://mainichi.jp/")'
-        />
+    <menuitem
+        label="site2"
+        insertbefore="sanitizeSeparator"
+        onmousedown='Block.startBlock("http://mainichi.jp/")'
+    />
         
-        <menuitem
-        	label="site3"
-        	insertbefore="sanitizeSeparator"
-        	onmousedown='Block.startBlock("http://mtg-jp.com/")'
-        />
+    <menuitem
+        label="site3"
+        insertbefore="sanitizeSeparator"
+        onmousedown='Block.startBlock("http://mtg-jp.com/")'
+    />
+    
     </menupopup>
 </overlay>

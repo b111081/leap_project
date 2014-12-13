@@ -14,7 +14,7 @@ var Block = {
 
       // 不要な要素を削除
       //$dom.find("meta").remove();
-      //$dom.find("link").remove();
+      $dom.find("link").remove();
 
       // 出力用ノード配列
       var node = [];
@@ -40,9 +40,9 @@ var Block = {
           var temp_text = $dom.text().replace(/\"/g, 'だぶるくおーてーしょん');
           if ($dom.get(0).tagName == "A"){
             block_html[i] = 
-            '<div id = "block" style="float:left;"><button id="block_link" aria-label="' + temp_text + '" style="width : 200px;height : 200px; word-break:keep-all;"><a href="' + $dom.get(0).href + '">' + temp_text + '</ button></ div>';
+            '<div id = "block" style="float:left;"><button id="block_text" aria-label="' + temp_text + '" style="width : 200px;height : 200px; word-break:keep-all;"><a href="' + $dom.get(0).href + '">' + temp_text + '</ button></ div>';
           } else {
-            block_html[i] = '<div id = "block" style="float:left;"><button aria-label="' + temp_text +'" style="width : 200px;height : 200px; word-break:keep-all;">' + temp_text + '</button></div>';
+            block_html[i] = '<div id = "block" style="float:left;"><button id="block_text" aria-label="' + temp_text +'" style="width : 200px;height : 200px; word-break:keep-all;">' + temp_text + '</button></div>';
           }
         }
 
@@ -84,7 +84,14 @@ var Block = {
 
       // 再度ページのhtmlをDOM要素として変数に格納
       var $block = $(newTab.contentDocument);
-
+      
+      // headにポインタに使うCSSを配置
+      var pointer_css = '<style type="text/css">#pointer {width: 50px;height: 50px;-webkit-border-radius: 25px;-moz-border-radius: 25px;border-radius: 25px;background-color: #999;position: absolute;}</style>';
+      $block.find("head").append(pointer_css);
+      
+      // ポインタ要素を配置
+      $block.find("body").append('<div id="pointer"></div>');
+      
       // ページにブロックを配置
       for (var i=0; i < len; i++) {
         $block.find("#block_pos").append(block_html[i]);
@@ -94,10 +101,8 @@ var Block = {
       // リンクがあるブロックの処理
       $block.find("#block_pos #block_link").click(function () {
         uri = $(this).children().get(0).href;
-        //alert(uri);
         Block.startBlock(uri);
       });
-
     }, true);
   }
 };

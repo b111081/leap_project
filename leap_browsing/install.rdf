@@ -10,7 +10,7 @@
     <em:version>0.1</em:version>
     <em:description>LeapMotion browsing addon.</em:description>
     <em:creator>b111081</em:creator>
-    <em:homepageURL>http://www.xuldev.org/misc/sd.php</em:homepageURL>
+    <em:homepageURL>https://github.com/b111081/leap_project</em:homepageURL>
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>

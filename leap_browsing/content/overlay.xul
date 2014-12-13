@@ -4,32 +4,29 @@
 	<!--- 各種ライブラリ読み込み -->
 	<script type="text/javascript" src="chrome://leap_browsing/content/block/jquery-1.11.1.min.js" />
 	<script type="text/javascript" src="chrome://leap_browsing/content/block/jquery.xdomainajax.js" />
+    <script type="text/javascript" src="chrome://leap_browsing/content/view/leap-0.6.4.min.js" />
+    <script type="text/javascript" src="chrome://leap_browsing/content/view/jquery-collision.min.js" />
     
     <!--- アドオンのメインプログラム --> 
     <script type="text/javascript" src="chrome://leap_browsing/content/block/block.js" />
     <script type="text/javascript" src="chrome://leap_browsing/content/view/view.js" />
-
-	<!--- ビュー処理監視用ループ関数 -->
-	<script>viewLoop();</script>
-
+	
+	
     <menupopup id="menu_ToolsPopup">
-    <menuitem
+      <menuitem
         label="site1"
         insertbefore="sanitizeSeparator"
         onmousedown='Block.startBlock("http://www.tohoho-web.com/html5/html5.html")'
-	/>
-        
-    <menuitem
+      />
+      <menuitem
         label="site2"
         insertbefore="sanitizeSeparator"
         onmousedown='Block.startBlock("http://mainichi.jp/")'
-    />
-        
-    <menuitem
-        label="site3"
-        insertbefore="sanitizeSeparator"
-        onmousedown='Block.startBlock("http://mtg-jp.com/")'
-    />
-    
-    </menupopup>
+      />
+     <menuitem
+       label="site3"
+       insertbefore="sanitizeSeparator"
+       onmousedown='Block.startBlock("http://mtg-jp.com/")'
+     />
+   </menupopup>
 </overlay>

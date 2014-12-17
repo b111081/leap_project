@@ -16,17 +16,17 @@
       <menuitem
         label="site1"
         insertbefore="sanitizeSeparator"
-        onmousedown='Block.startBlock("http://www.tohoho-web.com/html5/html5.html")'
+        onmousedown='Block("http://www.tohoho-web.com/html5/html5.html")'
       />
       <menuitem
         label="site2"
         insertbefore="sanitizeSeparator"
-        onmousedown='Block.startBlock("http://mainichi.jp/")'
+        onmousedown='Block("http://mainichi.jp/")'
       />
      <menuitem
        label="site3"
        insertbefore="sanitizeSeparator"
-       onmousedown='Block.startBlock("http://mtg-jp.com/")'
+       onmousedown='Block("http://mtg-jp.com/")'
      />
    </menupopup>
 </overlay>

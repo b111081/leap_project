@@ -10,23 +10,4 @@
     <!--- アドオンのメインプログラム --> 
     <script type="text/javascript" src="chrome://leap_browsing/content/block/block.js" />
     <script type="text/javascript" src="chrome://leap_browsing/content/view/view.js" />
-	
-	
-    <menupopup id="menu_ToolsPopup">
-      <menuitem
-        label="site1"
-        insertbefore="sanitizeSeparator"
-        onmousedown='Block("http://www.tohoho-web.com/html5/html5.html")'
-      />
-      <menuitem
-        label="site2"
-        insertbefore="sanitizeSeparator"
-        onmousedown='Block("http://mainichi.jp/")'
-      />
-     <menuitem
-       label="site3"
-       insertbefore="sanitizeSeparator"
-       onmousedown='Block("http://mtg-jp.com/")'
-     />
-   </menupopup>
 </overlay>

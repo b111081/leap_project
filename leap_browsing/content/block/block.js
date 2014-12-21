@@ -14,6 +14,7 @@ var Block = function(opt_uri) {
     // 不要な要素を削除
     //$dom.find("meta").remove();
     $dom.find("link").remove();
+    $dom.find("style").remove();
 
     // 出力用ノード配列
     var node = [];
@@ -83,17 +84,18 @@ var Block = function(opt_uri) {
 
     // 再度ページのhtmlをDOM要素として変数に格納
     var $block = $(newTab.contentDocument);
-      
+
     // headにポインタに使うCSSを配置
     var pointer_css = '<style type="text/css">#pointer {width: 50px;height: 50px;-webkit-border-radius: 25px;-moz-border-radius: 25px;border-radius: 25px;background-color: #999;position: absolute;}</style>';
     $block.find("head").append(pointer_css);
-     
+
     // ポインタ要素を配置
     $block.find("body").append('<div id="pointer"></div>');
-    
+
     // スクロールに使用する要素とスクリプト配置
-    $block.find("body").append('<div id="scroll_down" onclick="window.scrollTo(0,1000);"></div>');
-    
+    //$block.find("body").append('<div id="scroll_down" onclick="window.scrollBy(0,20);"></div>');
+    //$block.find("body").append('<div id="scroll_up" onclick="window.scrollBy(0,-20);"></div>');
+
     // ページにブロックを配置
     for (var i=0; i < len; i++) {
       $block.find("#block_pos").append(block_html[i]);

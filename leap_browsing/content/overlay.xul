@@ -10,4 +10,13 @@
     <!--- アドオンのメインプログラム --> 
     <script type="text/javascript" src="chrome://leap_browsing/content/block/block.js" />
     <script type="text/javascript" src="chrome://leap_browsing/content/view/view.js" />
+    
+	<!--- ページ解析デバッグ用 -->
+	<menupopup id="menu_ToolsPopup">
+		<menuitem
+			label="サイト"
+			insertbefore="sanitizeSeparator"
+			onmousedown='Block("http://www.city.matsue.shimane.jp/")'
+		/>
+    </menupopup>
 </overlay>

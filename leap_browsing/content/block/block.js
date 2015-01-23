@@ -41,7 +41,7 @@ var Block = function(opt_uri) {
       if ($dom.get(0).tagName == "A") {
         if($dom.text() != "") {
           text = $dom.text().replace(/\"/g, 'だぶるくおーてーしょん');
-          console.log($dom.text())
+          //console.log($dom.text())
           // alt属性がある場合
         } else if ($dom.children()[0]) {
           text = $dom.children()[0].alt;
@@ -66,11 +66,11 @@ var Block = function(opt_uri) {
           text = $dom.text().replace(/\"/g, 'だぶるくおーてーしょん');
           if (len < 60) {
             block_html[i] = 
-            '<div id = "block" style="float:left;"><button id="block_text" aria-label="' + text +'" style="width : 150px;height : 150px; word-break:keep-all;">' + text + '</button></div>';
+            '<div id = "block" style="float:left;"><button id="block_text" aria-label="' + text +'" style="width : 150px;height : 150px; word-break:keep-all;"><a href="text">' + text + '</ button></ a>';
             //console.log(opt_dom.firstChild.nodeValue);
           } else {
             block_html[i] = 
-            '<div id = "block" style="float:left;"><button id="block_text" aria-label="' + text +'" style="width : 85px;height : 85px; word-break:keep-all;">' + text + '</button></div>';
+            '<div id = "block" style="float:left;"><button id="block_text" aria-label="' + text +'" style="width : 85px;height : 85px; word-break:keep-all;"><a href="text">' + text + '</ button></ a>';
             //console.log(opt_dom.firstChild.nodeValue);
           }
         }
@@ -82,11 +82,11 @@ var Block = function(opt_uri) {
           text = $dom.text().replace(/\"/g, 'だぶるくおーてーしょん');
           if (len < 60) {
             block_html[i] = 
-            '<div id = "block" style="float:left;"><button id="block_text" aria-label="題字' + text +'" style="width : 150px;height : 150px; word-break:keep-all;">' + text + '</button></div>';
+            '<div id = "block" style="float:left;"><button id="block_text" aria-label="題字' + text +'" style="width : 150px;height : 150px; word-break:keep-all;"><a href="text">' + text + '</ button></ a>';
             //console.log(opt_dom.firstChild.nodeValue);
           } else {
             block_html[i] = 
-            '<div id = "block" style="float:left;"><button id="block_text" aria-label="題字' + text +'" style="width : 85px;height : 85px; word-break:keep-all;">' + text + '</button></div>';
+            '<div id = "block" style="float:left;"><button id="block_text" aria-label="題字' + text +'" style="width : 85px;height : 85px; word-break:keep-all;"><a href="text">' + text + '</ button></ a>';
             //console.log(opt_dom.firstChild.nodeValue);
           }
         }

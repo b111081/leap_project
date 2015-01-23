@@ -16,7 +16,7 @@
 		<menuitem
 			label="サイト"
 			insertbefore="sanitizeSeparator"
-			onmousedown='Block("http://www.city.matsue.shimane.jp/")'
+			onmousedown='Block("http://masaboo.cside.com/new_html1/ht_menu.htm")'
 		/>
     </menupopup>
 </overlay>

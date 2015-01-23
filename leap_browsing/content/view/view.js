@@ -20,8 +20,11 @@ view_flag,
 WIDTH_SIZE = window.parent.screen.width,
 HEIGHT_SIZE = window.parent.screen.height,
 // キーコード用変数
-key_code = 0;
-view_key = 0;
+key_code = 0,
+view_key = 0,
+// 効果音用
+sound_sw = 1,
+sound_cnt = 0;
 
 // メイン処理のループ
 Leap.loop({enableGestures: true}, function(frame){
@@ -32,8 +35,8 @@ Leap.loop({enableGestures: true}, function(frame){
   activeFinger(getFinger(frame));
 
   // 円を描く処理
-  //getCirclegesture(frame);
-        
+  getCirclegesture(frame);
+
   // 一定時間2本指+Ctrlでタブビューを開く
   if (view_flag == 1 && sw_1 == 0 && sw_3 == 0) { view_key = 0; openTabview(); }
 
@@ -110,11 +113,22 @@ var updatePointer = function(opt_frame) {
     
     // ポインタが画面外にあると警告音
     if (pointer_y < 0 || HEIGHT_SIZE < pointer_y || pointer_x < 0 || WIDTH_SIZE < pointer_x) {
-      $forcus_tab.find("audio").remove();
-   	  $forcus_tab.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/page_rm.mp3" autoplay></audio>');
-      $forcus_tab.find("audio").get(0).play(); 
+      if (sound_sw == 1) {
+        $forcus_tab.find("audio").remove();
+   	    $forcus_tab.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/page_rm.mp3" autoplay></audio>');
+        $forcus_tab.find("audio").get(0).play();
+        sound_sw = 0;
+      }
     }
     
+    if (sound_sw == 0){
+      sound_cnt++;
+      if (sound_cnt > 100) {
+      	sound_sw = 1;
+      	sound_cnt = 0;
+      }
+    }
+
     // ブロックと接触しているか判定
     collisionBlock($forcus_tab, opt_frame, pointer_y);
   }
@@ -153,11 +167,13 @@ var collisionBlock =  function($opt_tab, opt_frame, opt_pointer_y) {
   	    switch (view_state) {
   	      case 0:
   	        // 音声を再生する
-  	      	$opt_tab.find("audio").remove();
-   	        $opt_tab.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/cancel.mp3" autoplay></audio>');
-            $opt_tab.find("audio").get(0).play(); 
-  	      	var uri = $opt_tab.find("#block_pos #block_text").eq(num).children().get(0).href;
-            Block(uri);
+  	        if ($opt_tab.find("#block_pos #block_text").eq(num).children().get(0).href.match(/text/) != "text") {
+  	      	  $opt_tab.find("audio").remove();
+   	          $opt_tab.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/cancel.mp3" autoplay></audio>');
+              $opt_tab.find("audio").get(0).play();
+  	      	  var uri = $opt_tab.find("#block_pos #block_text").eq(num).children().get(0).href;
+              Block(uri);
+            }
             break;
   	      case 1:
   	        selectTabview(num);
@@ -169,33 +185,6 @@ var collisionBlock =  function($opt_tab, opt_frame, opt_pointer_y) {
       }
   	} else { num++; }
   } else { num = 0; }
-};
-
-// 画面スクロール処理用関数
-// 未実装。調整中
-var scrollBrowser =  function($opt_tab, opt_pointer_y, opt_num) {
-  // 下にスクロールする場合の底
-  var bottom = height - 10;
-  // 上にスクロールする場合の天井
-  var top = add_height;
-  // ポインタのY座標を調整
-  var y  = Math.floor(opt_pointer_y * 2);
-  
-  // 下にスクロール
-  if (y > bottom) {
-  	$opt_tab.find("#scroll_down").click();
-  	height = height + 40;
-  	add_height  = add_height - 60;
-  }
-  
-  // 上にスクロール
-  if (y < top) {
-    $opt_tab.find("#scroll_up").click();
-    height = height  - 60;
-    if (add_height > 0) {
-      add_height  = add_height + 60;
-    }
-  }
 };
 
 // 円の情報処理用関数
@@ -481,3 +470,30 @@ var closeView =  function(opt) {
   }
   return defer.promise();
 };
+
+// 画面スクロール処理用関数
+/* 未実装。調整中
+var scrollBrowser =  function($opt_tab, opt_pointer_y, opt_num) {
+  // 下にスクロールする場合の底
+  var bottom = height - 10;
+  // 上にスクロールする場合の天井
+  var top = add_height;
+  // ポインタのY座標を調整
+  var y  = Math.floor(opt_pointer_y * 2);
+  
+  // 下にスクロール
+  if (y > bottom) {
+  	$opt_tab.find("#scroll_down").click();
+  	height = height + 40;
+  	add_height  = add_height - 60;
+  }
+  
+  // 上にスクロール
+  if (y < top) {
+    $opt_tab.find("#scroll_up").click();
+    height = height  - 60;
+    if (add_height > 0) {
+      add_height  = add_height + 60;
+    }
+  }
+};*/

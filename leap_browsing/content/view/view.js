@@ -1,36 +1,24 @@
 // 排他処理用変数
 var sw_1 = 0, sw_2 = 0, sw_3 = 0, sw_4 = 0,
-//ビュー用変数
+// ビュー用変数
 tabview, bkview,
 // jquery用変数
 $tabview_dom, $bkview_dom,
-// ジェスチャー用変数
-gesture_type, gesture_state,
-// ジェスチャーカウント用変数
-right_cir_cnt = 0, left_cir_cnt = 0,
-// ブロックの接触判定用変数
-num = 0,
 // ビュー状態用変数
 view_state = 0,
 // ビュー切り替えの時間差に用いる変数
 active_time = 0,
 // ビューのフラグ管理用の変数
-view_flag,
+view_flag = 0,
 // 画面サイズ用変数
 WIDTH_SIZE = window.parent.screen.width,
-HEIGHT_SIZE = window.parent.screen.height,
-// キーコード用変数
-key_code = 0,
-view_key = 0,
-// 効果音用
-sound_sw = 1,
-sound_cnt = 0;
+HEIGHT_SIZE = window.parent.screen.height;
 
 // メイン処理のループ
 Leap.loop({enableGestures: true}, function(frame){
   // ポインターの更新処理
   updatePointer(frame);
- 
+
   // 指を一定時間開いていればフラグ成立
   activeFinger(getFinger(frame));
 
@@ -44,24 +32,126 @@ Leap.loop({enableGestures: true}, function(frame){
   if (view_flag == 2 && sw_3 == 0 && sw_1 == 0) { view_key = 0; openBkview(); }
 });
 
-// 指の本数取得用関数
-var getFinger =  function(opt_frame) {
-  // 手が認識されているか
-  if (opt_frame.hands.length > 0) {
-    // 受け取ったframeオブジェクトから指に関する値を取得
-    var hand = opt_frame.hands[0];
-    var finger = hand.fingers[0];
-    var extendedFingers = 0;
+// 効果音用
+var sound_sw = 1, sound_cnt = 0;
 
-    // 開いている指の本数を取得
-    for(var f = 0; f < hand.fingers.length; f++){
-      var finger = hand.fingers[f];
-      if(finger.extended) extendedFingers++;
+// ポインタ座標更新用関数
+var updatePointer = function(opt_frame) {
+  if (opt_frame.fingers[0]) {
+    // 現在フォーカスしているタブのDOMを取得
+    var $forcus_tab = $(gBrowser.contentDocument);
+    // Leapの座標を画面と対応させる
+    var pointer_x = (opt_frame.fingers[0].tipPosition[0] * 5) + (WIDTH_SIZE / 2);
+    var pointer_y = (HEIGHT_SIZE / 1.5) - (opt_frame.fingers[0].tipPosition[1] * 3 - 300);
+    // 座標更新のためのオブジェクト作成
+    var position = new Object();
+    position.left = pointer_x;
+    position.top = pointer_y;
+
+    // ポインタの座標を更新
+    if ($forcus_tab.find("#pointer").length != 0) {
+  	  $forcus_tab.find("#pointer").offset(position);
     }
-  } else {
-    extendedFingers = 0;
+
+    // ポインタが画面外にあると警告音
+    if (pointer_y < 0 || HEIGHT_SIZE < pointer_y || pointer_x < 0 || WIDTH_SIZE < pointer_x) {
+      if (sound_sw == 1) {
+        $forcus_tab.find("audio").remove();
+   	    $forcus_tab.find("body").append('<audio src="http://localhost/audio/page_rm.mp3" autoplay></audio>');
+        $forcus_tab.find("audio").get(0).play();
+        sound_sw = 0;
+      }
+    }
+
+    // 警告音の間隔調整
+    if (sound_sw == 0){
+      sound_cnt++;
+      if (sound_cnt > 100) {
+      	sound_sw = 1;
+      	sound_cnt = 0;
+      }
+    }
+
+    // ブロックと接触しているか判定
+    collisionBlock($forcus_tab, opt_frame, pointer_y);
   }
-  return extendedFingers;
+};
+
+// ブロックの接触判定用変数
+var num = 0, loop_max = 0,
+// キーコード用変数
+key_code = 0,
+view_key = 0,
+// 何列何行の基本情報を100個配列に格納
+pos_str = [],
+pos_x = 1,
+pos_y = 0;
+for (var i=0; i < 100; i++) {
+  if (i % 11 == 0) {
+    pos_x = 1;
+  	pos_y++;
+  }
+  pos_str[i] = pos_x + "列" + pos_y + "行のブロックです";
+  pos_x++;
+}
+
+// ポインタとブロックの接触判定処理用関数
+var collisionBlock =  function($opt_tab) {
+
+  // 調査ループに使用する変数
+  if (num == 0) {
+  	loop_max = $opt_tab.find("#block_pos #block").length;
+  }
+
+  // ブロックの数だけ接触しているか調査
+  if (loop_max > num) {
+  	var b = $opt_tab.find("#block_pos #block").eq(num);
+  	var block_col = $opt_tab.find("#pointer").collision(b);
+
+  	// 接触していた場合ブロックにフォーカスする
+    if (block_col.length != 0) {
+  	  $opt_tab.find("#block_pos #block_text").eq(num).focus();
+
+  	  // 調査するブロックの範囲を絞る
+      loop_max = num +5;
+
+  	  // 押されているキーは何か      
+      $opt_tab.keydown(function(e){
+        key_code = e.keyCode;
+        return false;
+      });
+
+      // Altキーを押した場合ブロックの座標を読み上げる
+      if (key_code == 18 && view_state == 0) {
+      	key_code = 0;
+      	$opt_tab.find("#pos").text(pos_str[num]).change();
+      }
+
+      // Ctrlキーを押した場合ブロックを押す
+  	  if (key_code == 17) {
+        key_code = 0;
+  	    // ビューの状態により処理を分ける
+  	    switch (view_state) {
+  	      case 0:
+  	        // 音声を再生する
+  	        if ($opt_tab.find("#block_pos #block_text").eq(num).children().get(0).href.match(/text/) != "text") {
+  	      	  $opt_tab.find("audio").remove();
+   	          $opt_tab.find("body").append('<audio src="http://localhost/audio/cancel.mp3" autoplay></audio>');
+              $opt_tab.find("audio").get(0).play();
+  	      	  var uri = $opt_tab.find("#block_pos #block_text").eq(num).children().get(0).href;
+              Block(uri);
+            }
+            break;
+  	      case 1:
+  	        selectTabview(num);
+  	      	break;
+  	      case 2:
+  	        selectBkview(num);
+  	        break;
+  	    }
+      }
+  	} else { num++; }
+  } else { num = 0; }
 };
 
 // ビューのフラグ管理用関数
@@ -93,99 +183,30 @@ var activeFinger =  function(opt_finger) {
   }
 };
 
-// ポインタ座標更新用関数
-var updatePointer = function(opt_frame) {
-  if (opt_frame.fingers[0]) {
-    // 現在フォーカスしているタブのDOMを取得
-    var $forcus_tab = $(gBrowser.contentDocument);
-    // Leapの座標を画面と対応させる
-    var pointer_x = (opt_frame.fingers[0].tipPosition[0] * 5) + (WIDTH_SIZE / 2);
-    var pointer_y = (HEIGHT_SIZE / 1.5) - (opt_frame.fingers[0].tipPosition[1] * 3);
-    // 座標更新のためのオブジェクト作成
-    var position = new Object();
-    position.left = pointer_x;
-    position.top = pointer_y;
+// 指の本数取得用関数
+var getFinger =  function(opt_frame) {
+  // 手が認識されているか
+  if (opt_frame.hands.length > 0) {
+    // 受け取ったframeオブジェクトから指に関する値を取得
+    var hand = opt_frame.hands[0];
+    var finger = hand.fingers[0];
+    var extendedFingers = 0;
 
-    // ポインタの座標を更新
-    if ($forcus_tab.find("#pointer").length != 0) {
-  	  $forcus_tab.find("#pointer").offset(position);
+    // 開いている指の本数を取得
+    for(var f = 0; f < hand.fingers.length; f++){
+      var finger = hand.fingers[f];
+      if(finger.extended) extendedFingers++;
     }
-    
-    // ポインタが画面外にあると警告音
-    if (pointer_y < 0 || HEIGHT_SIZE < pointer_y || pointer_x < 0 || WIDTH_SIZE < pointer_x) {
-      if (sound_sw == 1) {
-        $forcus_tab.find("audio").remove();
-   	    $forcus_tab.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/page_rm.mp3" autoplay></audio>');
-        $forcus_tab.find("audio").get(0).play();
-        sound_sw = 0;
-      }
-    }
-    
-    if (sound_sw == 0){
-      sound_cnt++;
-      if (sound_cnt > 100) {
-      	sound_sw = 1;
-      	sound_cnt = 0;
-      }
-    }
-
-    // ブロックと接触しているか判定
-    collisionBlock($forcus_tab, opt_frame, pointer_y);
+  } else {
+    extendedFingers = 0;
   }
+  return extendedFingers;
 };
 
-// ポインタとブロックの接触判定処理用関数
-var collisionBlock =  function($opt_tab, opt_frame, opt_pointer_y) {
-  // 調査ループに使用する変数
-  var block_loop = $opt_tab.find("#block_pos #block").length;
-
-  // ブロックの数だけ接触しているか調査
-  if (block_loop > num) {
-  	var b = $opt_tab.find("#block_pos #block").eq(num);
-  	var block_col = $opt_tab.find("#pointer").collision(b);
-
-  	// 接触していた場合ブロックにフォーカスする
-    if (block_col.length != 0) {
-  	  $opt_tab.find("#block_pos #block_text").eq(num).focus();
-
-  	  // スクロール処理
-  	  //scrollBrowser($opt_tab, opt_pointer_y, num);
-
-  	  // 調査するブロックの範囲を絞る
-      block_loop = num +5;
-      
-  	  // 押されているキーは何か      
-      $opt_tab.keydown(function(e){
-        key_code = e.keyCode;
-        return false;
-      });
-
-      // Ctrlキーを押した場合ブロックを押す
-  	  if (key_code == 17) {
-        key_code = 0;
-  	    // ビューの状態により処理を分ける
-  	    switch (view_state) {
-  	      case 0:
-  	        // 音声を再生する
-  	        if ($opt_tab.find("#block_pos #block_text").eq(num).children().get(0).href.match(/text/) != "text") {
-  	      	  $opt_tab.find("audio").remove();
-   	          $opt_tab.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/cancel.mp3" autoplay></audio>');
-              $opt_tab.find("audio").get(0).play();
-  	      	  var uri = $opt_tab.find("#block_pos #block_text").eq(num).children().get(0).href;
-              Block(uri);
-            }
-            break;
-  	      case 1:
-  	        selectTabview(num);
-  	      	break;
-  	      case 2:
-  	        selectBkview(num);
-  	        break;
-  	    }
-      }
-  	} else { num++; }
-  } else { num = 0; }
-};
+// ジェスチャー用変数
+var gesture_type, gesture_state;
+// ジェスチャーカウント用変数
+var right_cir_cnt = 0, left_cir_cnt = 0;
 
 // 円の情報処理用関数
 var getCirclegesture =  function(opt_frame) {
@@ -225,7 +246,7 @@ var getCirclegesture =  function(opt_frame) {
   	var $forcus_tab2 = $(gBrowser.contentDocument);
   	// 音声を再生する
   	$forcus_tab2.find("audio").remove();
-   	$forcus_tab2.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/page_rm.mp3" autoplay></audio>');
+   	$forcus_tab2.find("body").append('<audio src="http://localhost/audio/page_rm.mp3" autoplay></audio>');
     $forcus_tab2.find("audio").get(0).play();
   	left_cir_cnt = 0;
   }
@@ -246,7 +267,7 @@ var getCirclegesture =  function(opt_frame) {
   	
   	// 音声を再生する
   	$forcus_tab2.find("audio").remove();
-   	$forcus_tab2.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/page_bk.mp3" autoplay></audio>');
+   	$forcus_tab2.find("body").append('<audio src="http://localhost/audio/page_bk.mp3" autoplay></audio>');
     $forcus_tab2.find("audio").get(0).play();
   	right_cir_cnt = 0;
   }
@@ -299,7 +320,7 @@ var openTabview =  function() {
     }
 
     // 音声を再生する
-   	$tabview_dom.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/tab.mp3" autoplay></audio>');
+   	$tabview_dom.find("body").append('<audio src="http://localhost/audio/tab.mp3" autoplay></audio>');
     $tabview_dom.find("audio").get(0).play();
   }, true);
 
@@ -313,7 +334,7 @@ var selectTabview =  function(opt_num) {
   if (sw_2 == 0) {
     // 音声を再生する
     $tabview_dom.find("audio").remove();
-   	$tabview_dom.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/cancel.mp3" autoplay></audio>');
+   	$tabview_dom.find("body").append('<audio src="http://localhost/audio/cancel.mp3" autoplay></audio>');
     $tabview_dom.find("audio").get(0).play();
     // 音声が再生終了したら閉じる処理をする
     var promise = closeView(opt_num);
@@ -407,7 +428,7 @@ var openBkview =  function() {
     }
 
     // 音声を再生する
-   	$bkview_dom.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/bk.mp3" autoplay></audio>');
+   	$bkview_dom.find("body").append('<audio src="http://localhost/audio/bk.mp3" autoplay></audio>');
     $bkview_dom.find("audio").get(0).play();
   }, true);
 
@@ -422,7 +443,7 @@ var selectBkview =  function(opt) {
     if (sw_4 == 0) {
       // 音声を再生する
       $bkview_dom.find("audio").remove();
-   	  $bkview_dom.find("body").append('<audio src="http://hitsol-1.cc.it-hiroshima.ac.jp/~common/audio/cancel.mp3" autoplay></audio>');
+   	  $bkview_dom.find("body").append('<audio src="http://localhost/audio/cancel.mp3" autoplay></audio>');
    	  // 音声再生終了後処理開始
       $bkview_dom.find("audio").get(0).play();
       // 音声が再生終了したら閉じる処理をする
@@ -447,7 +468,7 @@ var initBkview =  function() {
 var closeView =  function(opt) {
   // 同期処理用変数
   var defer = $.Deferred();
-  if (sw_1 == 1) {
+  if (opt.length < 3) {
     setTimeout(function() {
       // 押されたタブブロックの番号のタブを開く
       gBrowser.selectedTab = gBrowser.tabContainer.childNodes[opt];
@@ -457,7 +478,7 @@ var closeView =  function(opt) {
       // 初期化処処理
       initTabview();
     }, 500);
-  } else if (sw_3 == 1) {
+  } else {
     setTimeout(function() {
       // ブックマークビュー消去
       gBrowser.removeTab(gBrowser.tabContainer.childNodes[gBrowser.tabContainer.childNodes.length-1]);
@@ -470,30 +491,3 @@ var closeView =  function(opt) {
   }
   return defer.promise();
 };
-
-// 画面スクロール処理用関数
-/* 未実装。調整中
-var scrollBrowser =  function($opt_tab, opt_pointer_y, opt_num) {
-  // 下にスクロールする場合の底
-  var bottom = height - 10;
-  // 上にスクロールする場合の天井
-  var top = add_height;
-  // ポインタのY座標を調整
-  var y  = Math.floor(opt_pointer_y * 2);
-  
-  // 下にスクロール
-  if (y > bottom) {
-  	$opt_tab.find("#scroll_down").click();
-  	height = height + 40;
-  	add_height  = add_height - 60;
-  }
-  
-  // 上にスクロール
-  if (y < top) {
-    $opt_tab.find("#scroll_up").click();
-    height = height  - 60;
-    if (add_height > 0) {
-      add_height  = add_height + 60;
-    }
-  }
-};*/

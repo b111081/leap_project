@@ -1,3 +1,4 @@
+/* 複数の関数で扱うグローバル変数 */
 // 排他処理用変数
 var sw_1 = 0, sw_2 = 0, sw_3 = 0, sw_4 = 0,
 // ビュー用変数
@@ -13,6 +14,35 @@ view_flag = 0,
 // 画面サイズ用変数
 WIDTH_SIZE = window.parent.screen.width,
 HEIGHT_SIZE = window.parent.screen.height;
+
+/* updatePointer関数で扱うグローバル変数 */
+// 効果音用
+var sound_sw = 1, sound_cnt = 0;
+
+/* collisionBlock関数で扱うグローバル変数 */
+// ブロックの接触判定用変数
+var num = 0, loop_max = 0,
+// キーコード用変数
+key_code = 0,
+view_key = 0,
+// 何列何行の基本情報を100個配列に格納
+pos_str = [],
+pos_x = 1,
+pos_y = 0;
+for (var i=0; i < 100; i++) {
+  if (i % 11 == 0) {
+    pos_x = 1;
+  	pos_y++;
+  }
+  pos_str[i] = pos_x + "列" + pos_y + "行のブロックです";
+  pos_x++;
+}
+
+/* getCirclegesture関数で扱うグローバル変数 */
+// ジェスチャー用変数
+var gesture_type, gesture_state;
+// ジェスチャーカウント用変数
+var right_cir_cnt = 0, left_cir_cnt = 0;
 
 // メイン処理のループ
 Leap.loop({enableGestures: true}, function(frame){
@@ -31,9 +61,6 @@ Leap.loop({enableGestures: true}, function(frame){
   // 一定時間3本指+Ctrlでブックマークビューを開く
   if (view_flag == 2 && sw_3 == 0 && sw_1 == 0) { view_key = 0; openBkview(); }
 });
-
-// 効果音用
-var sound_sw = 1, sound_cnt = 0;
 
 // ポインタ座標更新用関数
 var updatePointer = function(opt_frame) {
@@ -77,26 +104,8 @@ var updatePointer = function(opt_frame) {
   }
 };
 
-// ブロックの接触判定用変数
-var num = 0, loop_max = 0,
-// キーコード用変数
-key_code = 0,
-view_key = 0,
-// 何列何行の基本情報を100個配列に格納
-pos_str = [],
-pos_x = 1,
-pos_y = 0;
-for (var i=0; i < 100; i++) {
-  if (i % 11 == 0) {
-    pos_x = 1;
-  	pos_y++;
-  }
-  pos_str[i] = pos_x + "列" + pos_y + "行のブロックです";
-  pos_x++;
-}
-
 // ポインタとブロックの接触判定処理用関数
-var collisionBlock =  function($opt_tab) {
+var collisionBlock =  function($opt_tab, opt_frame, opt_pointer_y) {
 
   // 調査ループに使用する変数
   if (num == 0) {
@@ -203,11 +212,6 @@ var getFinger =  function(opt_frame) {
   return extendedFingers;
 };
 
-// ジェスチャー用変数
-var gesture_type, gesture_state;
-// ジェスチャーカウント用変数
-var right_cir_cnt = 0, left_cir_cnt = 0;
-
 // 円の情報処理用関数
 var getCirclegesture =  function(opt_frame) {
   // ジェスチャーの向き用変数
@@ -275,9 +279,6 @@ var getCirclegesture =  function(opt_frame) {
 
 // タブビュー表示用関数
 var openTabview =  function() {
-  //画面サイズ初期化
-  width = window.parent.screen.width;
-  height = window.parent.screen.height;
   // ビュー識別の変数処理
   view_state = 1;
   // 現在開かれているタブの数を取得
@@ -355,11 +356,7 @@ var initTabview  = function() {
 };
 
 // ブックマークビュー表示用関数
-var openBkview =  function() {
-  //画面サイズ初期化
-  width = window.parent.screen.width;
-  height = window.parent.screen.height;
-  
+var openBkview =  function() {  
   // ビュー識別の変数処理
   view_state = 2;
   
@@ -468,7 +465,7 @@ var initBkview =  function() {
 var closeView =  function(opt) {
   // 同期処理用変数
   var defer = $.Deferred();
-  if (opt.length < 3) {
+  if (view_state == 1) {
     setTimeout(function() {
       // 押されたタブブロックの番号のタブを開く
       gBrowser.selectedTab = gBrowser.tabContainer.childNodes[opt];
